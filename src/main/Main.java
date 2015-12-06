@@ -1,5 +1,6 @@
 package main;
 
+import dispatcher.Dispatcher;
 import port.Port;
 import ship.Ship;
 import warehouse.Container;
@@ -16,9 +17,9 @@ public class Main {
 			containerList.add(new Container(i));
 		}
 		Port port = new Port(2, 90);
+
 		port.setContainersToWarehouse(containerList);
-		
-		
+
 		containerList = new ArrayList<Container>(warehousePortSize);
 		for (int i=0; i<warehousePortSize; i++){
 			containerList.add(new Container(i+30));
@@ -31,25 +32,27 @@ public class Main {
 		}
 		Ship ship2 = new Ship("Ship2", port, 90);
 		ship2.setContainersToWarehouse(containerList);
-		
+
 		containerList = new ArrayList<Container>(warehousePortSize);
 		for (int i=0; i<warehousePortSize; i++){
 			containerList.add(new Container(i+60));
 		}
 		Ship ship3 = new Ship("Ship3", port, 90);
-		ship3.setContainersToWarehouse(containerList);		
-		
-		
+		ship3.setContainersToWarehouse(containerList);
+
+		Dispatcher dispatcher = new Dispatcher(port);
+
+		new Thread(dispatcher).start();
 		new Thread(ship1).start();		
 		new Thread(ship2).start();		
 		new Thread(ship3).start();
-		
 
-		Thread.sleep(3000);
+		Thread.sleep(10000);
 		
 		ship1.stopThread();
 		ship2.stopThread();
 		ship3.stopThread();
+		dispatcher.stopThread();
 
 	}
 

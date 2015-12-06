@@ -6,7 +6,6 @@ public class Container {
 	public Container(int id){
 		this.id = id;
 	}
-	
 	public int getId(){
 		return id;
 	}

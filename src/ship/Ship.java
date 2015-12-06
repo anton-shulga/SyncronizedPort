@@ -12,7 +12,7 @@ import java.util.Random;
 
 public class Ship implements Runnable {
 
-	private final static Logger logger = Logger.getRootLogger();
+	private final static Logger logger = Logger.getLogger("console");
 	private volatile boolean stopThread = false;
 
 	private String name;
@@ -51,7 +51,7 @@ public class Ship implements Runnable {
 	}
 
 	private void atSea() throws InterruptedException {
-		Thread.sleep(1000);
+		Thread.sleep(500);
 	}
 
 
@@ -61,7 +61,7 @@ public class Ship implements Runnable {
 		Berth berth = null;
 		try {
 			isLockedBerth = port.lockBerth(this);
-			
+
 			if (isLockedBerth) {
 				berth = port.getBerth(this);
 				logger.debug("Корабль " + name + " пришвартовался к причалу " + berth.getId());
@@ -72,11 +72,12 @@ public class Ship implements Runnable {
 			}
 		} finally {
 			if (isLockedBerth){
+				Thread.sleep(1000);
 				port.unlockBerth(this);
 				logger.debug("Корабль " + name + " отошел от причала " + berth.getId());
 			}
 		}
-		
+
 	}
 
 	private void executeAction(ShipAction action, Berth berth) throws InterruptedException {
@@ -92,7 +93,7 @@ public class Ship implements Runnable {
 
 	private boolean loadToPort(Berth berth) throws InterruptedException {
 
-		int containersNumberToMove = conteinersCount();
+		int containersNumberToMove = conteinersCount(this.getWarehouse().getRealSize());
 		boolean result = false;
 
 		logger.debug("Корабль " + name + " хочет загрузить " + containersNumberToMove
@@ -113,7 +114,7 @@ public class Ship implements Runnable {
 
 	private boolean loadFromPort(Berth berth) throws InterruptedException {
 		
-		int containersNumberToMove = conteinersCount();
+		int containersNumberToMove = conteinersCount(this.getWarehouse().getRealSize());
 		
 		boolean result = false;
 
@@ -133,9 +134,18 @@ public class Ship implements Runnable {
 		return result;
 	}
 
-	private int conteinersCount() {
+	private int conteinersCount(int size) {
 		Random random = new Random();
-		return random.nextInt(20) + 1;
+
+		if (size == 0) {
+			return 1;
+		}
+
+		int containers = random.nextInt(size) + 1;
+		if (containers > size) {
+			return size;
+		}
+		return containers;
 	}
 
 	private ShipAction getNextAction() {
@@ -152,4 +162,6 @@ public class Ship implements Runnable {
 	enum ShipAction {
 		LOAD_TO_PORT, LOAD_FROM_PORT
 	}
+
+	public Warehouse getWarehouse() {return shipWarehouse;}
 }
